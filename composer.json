@@ -1,0 +1,12 @@
+{
+    "name": "mymvc/smsapi",
+    "description": "api for otp and sms",
+    "type": "project",
+    "require": {
+        "vlucas/valitron": "^1.4",
+        "firebase/php-jwt": "^6.10",
+        "phpmailer/phpmailer": "^6.9",
+        "twig/twig": "^3.18",
+        "hashids/hashids": "^5.0"
+    }
+}

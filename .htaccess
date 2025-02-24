@@ -1,0 +1,12 @@
+# منع الوصول المباشر إلى المجلدات الحساسة
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # منع الوصول إلى المجلدات الحساسة
+    RewriteRule ^(view|model|helper|controller|config)($|/) - [F,L]
+
+    # إعادة التوجيه إلى مجلد public
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ public/index.php [L]
+</IfModule>
