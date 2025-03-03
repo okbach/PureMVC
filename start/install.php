@@ -3,10 +3,9 @@ require __DIR__ . '/../helper/smart_Include.php';
 smartInclude('config/env.php');
 
 
-function getDatabaseConnection() {
-
+function getDatabaseConnection($dbname = null) {
     
-    $dsn = 'mysql:host='.host.';dbname='.db_name.';charset=utf8mb4';
+    $dsn = 'mysql:host=' . host . ($dbname ? ';dbname=' . $dbname : '') . ';charset=utf8mb4';
     $username = user;
     $password = pass;
     $options = [
@@ -16,6 +15,18 @@ function getDatabaseConnection() {
 
     return new PDO($dsn, $username, $password, $options);
 }
+
+function createDatabase($pdo, $dbname) {
+    try {
+ 
+        $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
+        $pdo->exec($sql);  
+        echo "created '$dbname'  successfully!<br>";
+    } catch (PDOException $e) {
+        echo "failed  " . $e->getMessage();
+    }
+}
+
 
 // إنشاء الجداول
 function createTables($pdo) {
@@ -115,7 +126,7 @@ function createTables($pdo) {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (uid) REFERENCES users(uid) ON DELETE CASCADE,
                 FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id) ON DELETE CASCADE,
-                INDEX idx_payment_date (payment_date)  -- فهرس على حقل تاريخ الدفع
+                INDEX idx_payment_date (payment_date)  -- فهرس    
             )
         ",
         'role_user' => "
@@ -152,9 +163,11 @@ function createTables($pdo) {
     }
 }
 
-// تنفيذ البرنامج
+
 try {
     $pdo = getDatabaseConnection();
+    createDatabase($pdo, db_name);
+    $pdo = getDatabaseConnection(db_name);
     createTables($pdo);
 } catch (PDOException $e) {
     echo "Database connection failed: " . $e->getMessage();

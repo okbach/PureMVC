@@ -9,36 +9,41 @@ smartInclude('helper/curd_db.php');//DynamicCrud
 smartInclude('helper/mailer.php');//send email
 smartInclude('helper/response.php');// respons json 
 smartInclude('helper/render_template.php');// respons json 
-smartInclude('helper/custom_valid.php');// Custom Validator
+
+
 smartInclude('model/user.php');//User class databass
 
 
 
 //Valitron for Validat input
-use Valitron\Validator; //https://github.com/vlucas/valitron  $v->rule Validator
+//use Valitron\Validator; //https://github.com/vlucas/valitron  $v->rule Validator
 //use Firebase\JWT\Key;
 use Firebase\JWT\JWT;
 // Twig for templet 
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
+//--------------------------------------------------------------------
+smartInclude('Validation/custom_valid.php');// Custom Validator
+smartInclude('Validation/BaseValidator.php');// Custom Validator
+smartInclude('Validation/UserValidator.php');// Custom Validator
+use App\Validation\UserValidator;
+$validators = new UserValidator();
+//--------------------------------------------------------------------------
 
-
-$language = $lang ='ar';//this global varibel used in trmplat file 
+/*$language = $lang ='ar';//this global varibel used in trmplat file 
 Validator::langDir(__DIR__.'/../lang');
-Validator::lang($language);
+Validator::lang($language);*/
 
 $data = json_decode(file_get_contents('php://input'), true);//catch all input for procee 
 //print_r($data);
 
 
-$v = new Validator($data);// metho to put all input to be ready Validai later 
 
 $pdo = getDB(); // this to connect db
 
 
 $userModel = new User($pdo);
-
 
 
 
@@ -52,15 +57,8 @@ $userModel = new User($pdo);
 
             case 'create':
                  
-                $v->rule('required', 'name')->rule('alphaNum', 'name')->rule('lengthBetween', 'name', 4, 10);
-                $v->rule('required', 'email')->rule('email', 'email');
-                $v->rule('phone', 'phone_number')->rule('required', 'phone_number');
-
-                $v->rule('lengthMin', 'password', 8)->rule('required', 'password');
-                $v->rule('regex', 'password', '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
-                    ->message('Make sure your password contains uppercase and lowercase letters, numbers and symbols.');  
-                    
-                //$v->rule('equals', 'password', 'confirmPassword');
+                $v = $validators->validateRegistration();//Validators::validateRegistration($data);
+               
                 
                 if ($v->validate() && $result = $userModel->create($data) ) { 
                     response('success', $result);
@@ -71,9 +69,7 @@ $userModel = new User($pdo);
             break;
             case 'login':
              
-                $v->rule('required', 'email')->rule('email', 'email');
-                $v->rule('lengthMin', 'password', 8)->rule('required', 'password');
-                $v->rule('regex', 'password', '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')->message('Make sure your password contains uppercase and lowercase letters, numbers and symbols.');  
+                $v = $validators->validateLogin();
 
                 if ($v->validate() && $result = $userModel->login($data) ) { 
 
@@ -106,7 +102,7 @@ $userModel = new User($pdo);
             break;
             case 'resetpassword':
                 
-                $v->rule('required', 'email')->rule('email', 'email');
+                $v = $validators->validateResetPassword();
                 
                 if ($v->validate()) {
                     
@@ -163,11 +159,7 @@ $userModel = new User($pdo);
             break;     
             case 'updatepassword':
 
-                $v->rule('required', 'email')->rule('email', 'email');
-                $v->rule('required', 'code')->rule('length', 'code', 32); 
-                $v->rule('required', 'new_password')->rule('lengthMin', 'new_password', 8);
-                $v->rule('regex', 'new_password', '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
-                    ->message('يجب أن تحتوي كلمة المرور على أحرف كبيرة وصغيرة وأرقام ورموز.');  
+                $v = $validators->validateUpdatePassword();
                 
                 if (!$v->validate()) {
                     response('error', 'بيانات غير صالحة.', $v->errors());
