@@ -15,10 +15,6 @@ smartInclude('model/user.php');//User class databass
 
 
 
-//Valitron for Validat input
-//use Valitron\Validator; //https://github.com/vlucas/valitron  $v->rule Validator
-//use Firebase\JWT\Key;
-use Firebase\JWT\JWT;
 // Twig for templet 
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
@@ -31,9 +27,11 @@ use App\Validation\UserValidator;
 $validators = new UserValidator();
 //--------------------------------------------------------------------------
 
-/*$language = $lang ='ar';//this global varibel used in trmplat file 
-Validator::langDir(__DIR__.'/../lang');
-Validator::lang($language);*/
+smartInclude('services/JwtService.php');
+use App\Services\JwtService;
+$jwtService = new JwtService(jwtKey);
+//-------------------------------------------------------------------------
+
 
 $data = json_decode(file_get_contents('php://input'), true);//catch all input for procee 
 //print_r($data);
@@ -73,25 +71,10 @@ $userModel = new User($pdo);
 
                 if ($v->validate() && $result = $userModel->login($data) ) { 
 
-                    $payload = [
-                        'iss' => 'auth', 
-                        'aud' => 'wadiea.com', 
-                        'iat' => time(), 
-                        'exp' => time() + 3600*24, //1 day
-                        'data' => $result
-                    ];                     
-                    $refreshPayload = [
-                        'iss' => 'auth',
-                        'aud' => 'wadiea.com',
-                        'iat' => time(),
-                        'exp' => time() + 3600 * 24 * 30, // 30 day
-                        'data' => $result
-                    ];
-
-                    $Token = JWT::encode($payload, jwtKey, 'HS256');              
-                    $refreshToken = JWT::encode($refreshPayload, jwtKey, 'HS256');
-                    $result->Token    =   $Token;
-                    $result->refreshToken =    $refreshToken;
+                    
+                    
+                    $result->Token    =    $jwtService->generateToken((array) $result, 3600 * 24); // 1 day
+                    $result->refreshToken =    $jwtService->generateToken((array) $result, 3600 * 30); // 30 day
                     //header('Authorization: Bearer ' . $Token);
                         response('success', $result);      
                 } else {    
@@ -116,7 +99,7 @@ $userModel = new User($pdo);
                             
                             
                             
-                            $url = "127.0.0.1/mymvc/api/auth.php?action=updatepassword&code=$code"; 
+                            $url = "$code"; 
 
                             $datax = smartInclude("lang/$lang/email/resetpassword.php");
                             $datax['url'] = $url ;
