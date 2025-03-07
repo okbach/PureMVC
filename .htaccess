@@ -4,7 +4,9 @@
 
     # منع الوصول إلى المجلدات الحساسة
     RewriteRule ^(view|model|helper|controller|config)($|/) - [F,L]
-
+    
+    php_flag display_errors off
+    
     # إعادة التوجيه إلى مجلد public
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

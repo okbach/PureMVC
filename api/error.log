@@ -1,0 +1,30 @@
+[2025-03-07 03:33:31] Warning: Undefined variable $language in C:\xampp\htdocs\PureMVC\api\auth.php on line 179 (UUID: a44e85eb-6688-40c6-9f50-8d47a4032fba)
+[2025-03-07 03:38:21] Warning: Undefined variable $language in C:\xampp\htdocs\PureMVC\api\auth.php on line 192 (UUID: e2812082-7aa8-4461-a7c1-d80c427cb468)
+[2025-03-07 03:39:03] Error: Uncaught Error: Class "User" not found in C:\xampp\htdocs\PureMVC\api\auth.php:128
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\PureMVC\api\auth.php on line 128 (UUID: 6300b729-1c96-445d-beb1-02239f21de82)
+[2025-03-07 03:46:11] Error: Uncaught Error: Class "User" not found in C:\xampp\htdocs\PureMVC\api\auth.php:128
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\PureMVC\api\auth.php on line 128 (UUID: 64346dba-7770-431b-aefe-4de01943601c)
+[2025-03-07 03:50:46] Error: Uncaught Error: Class "User" not found in C:\xampp\htdocs\PureMVC\api\auth.php:128
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\PureMVC\api\auth.php on line 128 (UUID: 66c9389c-1243-43b9-8d3e-8853fd94c3bd)
+[2025-03-07 03:52:13] Error: Uncaught Error: Class "User" not found in C:\xampp\htdocs\PureMVC\api\auth.php:128
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\PureMVC\api\auth.php on line 128 (UUID: 664570bd-20fa-4d1f-8707-4ce5fd92830f)
+[2025-03-07 03:53:49] Error: Uncaught Error: Class "User" not found in C:\xampp\htdocs\PureMVC\api\auth.php:128
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\PureMVC\api\auth.php on line 128 (UUID: fee06e67-c90f-46ce-98f5-36806e1f909c)
+[2025-03-07 03:55:09] Error: Uncaught Error: Class "User" not found in C:\xampp\htdocs\PureMVC\api\auth.php:128
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\PureMVC\api\auth.php on line 128 (UUID: 786d08e4-34d9-463a-8b05-1deb92a3c23d)
+[2025-03-07 03:56:00] Error: Uncaught Error: Class "User" not found in C:\xampp\htdocs\PureMVC\api\auth.php:128
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\PureMVC\api\auth.php on line 128 (UUID: 97222a7f-aec7-4251-b512-7944fef6713b)

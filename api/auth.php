@@ -1,16 +1,15 @@
 <?php
-header('Content-Type: application/json');
 
 require __DIR__ . '/../helper/smart_Include.php';
 smartInclude('vendor/autoload.php');//for use namespece like use Valitron\Validator;
+smartInclude('helper/smartbuglog.php');
+
 smartInclude('config/env.php');
 smartInclude('config/connect_db.php');//function getDB()
 smartInclude('helper/curd_db.php');//DynamicCrud
 smartInclude('helper/mailer.php');//send email
 smartInclude('helper/response.php');// respons json 
 smartInclude('helper/render_template.php');// respons json 
-
-
 smartInclude('model/user.php');//User class databass
 
 
@@ -31,6 +30,16 @@ smartInclude('services/JwtService.php');
 use App\Services\JwtService;
 $jwtService = new JwtService(jwtKey);
 //-------------------------------------------------------------------------
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\Loader\YamlFileLoader;
+
+$lang ='ar';
+$translator = new Translator($lang); 
+$translator->addLoader('yaml', new YamlFileLoader());
+$translator->addResource('yaml', __DIR__ . '/../translations/auth/'.$lang.'.yaml', $lang);
+
+//----------------------------------------------------------------------------
+
 
 
 $data = json_decode(file_get_contents('php://input'), true);//catch all input for procee 
@@ -61,7 +70,7 @@ $userModel = new User($pdo);
                 if ($v->validate() && $result = $userModel->create($data) ) { 
                     response('success', $result);
                 } else {     
-                    response('error', $userModel->errorMessages, $v->errors());              
+                    response('error', null, $v->errors(),$userModel->errorMessages,[],$translator);              
                 }
                
             break;
@@ -78,68 +87,57 @@ $userModel = new User($pdo);
                     //header('Authorization: Bearer ' . $Token);
                         response('success', $result);      
                 } else {    
-                         response('error', $userModel->errorMessages, $v->errors());               
+                    response('error', null, $v->errors(),$userModel->errorMessages,[],$translator);            
                         
                 }
                    
             break;
             case 'resetpassword':
-                
-                $v = $validators->validateResetPassword();
-                
-                if ($v->validate()) {
-                    
-                    $user = $userModel->crud->selectWhere('users', 'uid, email', ['email' => $data['email']], 1);
-                    
-                    if ($user) {
-                        
-                        $code = $userModel->createResetPasswordCode($user->uid, $user->email, 'email');
-                        
-                        if ($code) {
-                            
-                            
-                            
-                            $url = "$code"; 
-
-                            $datax = smartInclude("lang/$lang/email/resetpassword.php");
-                            $datax['url'] = $url ;
-                            $datax['company_name'] = 'wadiea';
-                            $datax['dir'] = 'rtl';
-                            $datax['language'] = $language;
-                            $subject = $datax['subject'];
-
-                                //Twig engin templet
-                                $loader = new FilesystemLoader(__DIR__ . '/../view/templates');
-                                $twig = new Environment($loader, [
-                                    'cache' => __DIR__ . '/cache', 
-                                    'debug' => true, 
-                                ]);
-                                
-
-                                $body = $twig->render('email/resetpassword.twig', $datax );
-                                //$twig->$GLOBALS
-                                $mailer = new Mailer();
-                                $to = $user->email;
-
-
-                            if ($mailer->send($to, $subject,  $body, true)) {
-                               
-                                response('success', 'تم إرسال رمز التحقق إلى بريدك الإلكتروني.', $v->errors());   
-                            } else {
-                                response('success', 'فشل في إرسال البريد الإلكتروني.', $v->errors()); 
-                            }
-                        } else {
-                            response('error', 'فشل في إنشاء رمز التحقق.', $v->errors()); 
-                        }
-                    } else {
-                        
-                        response('error', 'البريد الإلكتروني غير مسجل.', $v->errors()); 
+               // try {
+                    $v = $validators->validateResetPassword();
+                    if (!$v->validate()) {
+                        throw new Exception("خطأ في التحقق من البيانات: " . json_encode($v->errors()));
                     }
-                } else {
-                    response('error', '', $v->errors()); 
-
-                }
-            break;     
+            
+                    $user = $userModel->crud->selectWhere('users', 'uid, email', ['email' => $data['email']], 1);
+                    if (!$user) {
+                        throw new Exception("البريد الإلكتروني غير مسجل.");
+                    }
+            
+                    $code = $userModel->createResetPasswordCode($user->uid, $user->email, 'email');
+                    if (!$code) {
+                        throw new Exception("فشل في إنشاء رمز التحقق.");
+                    }
+            
+                    $url = "$code";
+                    $datax = smartInclude("lang/$lang/email/resetpassword.php");
+                    $datax['url'] = $url;
+                    $datax['company_name'] = 'wadiea';
+                    $datax['dir'] = 'rtl';
+                    $datax['language'] = $lang;
+                    $subject = $datax['subject'];
+            
+                    $loader = new FilesystemLoader(__DIR__ . '/../view/templates');
+                    $twig = new Environment($loader, ['cache' => __DIR__ . '/cache', 'debug' => true]);
+                    $body = $twig->render('email/resetpassword.twig', $datax);
+            
+                    $mailer = new Mailer();
+                    $to = $user->email;
+                    if (!$mailer->send($to, $subject, $body, true)) {
+                        throw new Exception("فشل في إرسال البريد الإلكتروني.");
+                    }
+            
+                    $message = $translator->trans('sent_verification_email', [], null, $translator->getLocale());
+                    $result = ["message" => $message, "email" => "user@example.com", "redirect_to" => "/verify-otp"];
+                    response('success', $result, $v->errors(), $userModel->errorMessages, [], $translator);
+            
+                //} catch (Exception $e) {
+                       
+                //    response('error', null, $v->errors(), $userModel->errorMessages, ['error' => $e->getMessage()], $translator);
+               // }
+                break;
+            
+ 
             case 'updatepassword':
 
                 $v = $validators->validateUpdatePassword();

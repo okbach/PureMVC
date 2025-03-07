@@ -28,7 +28,7 @@ class User {
         $userId = $this->crud->insert('users', $userData);
 
         if (!$userId) {
-            $this->errorMessages = 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.';
+            $this->errorMessages = 'account_creation_error';
             return false;//تحتاج تفكير ربما ارجع  $userId 
         }
         
@@ -47,7 +47,7 @@ class User {
 
         if (!$data) {
 
-            $this->errorMessages = 'لا يوجد هذا الحساب';
+            $this->errorMessages = 'account_not_found';
             return false;
         }
 
@@ -58,7 +58,7 @@ class User {
 
         }else{
 
-            $this->errorMessages = 'تحقق من كلمة سر مرة ثانية';
+            $this->errorMessages = 'login_failed';//'تحقق من كلمة سر مرة ثانية';
             return false; 
         }
         
@@ -134,7 +134,7 @@ class User {
         ];
 
         // إدخال الرمز في جدول verification_codes
-        $result = $this->crud->insert('verification_codes', $verificationData);
+        $result = $this->crud->insert('verification_codes5', $verificationData);
 
         if ($result) {
             return $code;

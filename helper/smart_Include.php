@@ -15,11 +15,9 @@ function smartInclude($filePath) {
         
     } else {
         echo "basePath: " . realpath($basePath) . "<br>";
-
-        echo "Failed to include the file. Requested path: " . realpath($fullPath) . "<br>";
-        echo "File Path: " . $filePath . "<br>";
-
-        echo "File name: " . basename($fullPath) . "<br>";
+        echo "Failed include path: " . $fullPath . "<br>";
+        //echo "File Path: " . $filePath . "<br>";
+        //echo "File name: " . basename($fullPath) . "<br>";
 
 
         return false;
