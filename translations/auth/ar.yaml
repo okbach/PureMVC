@@ -8,3 +8,4 @@ password_reset_success: "تم إعادة تعيين كلمة المرور بنج
 password_reset_error: "فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى."
 validation_error: "خطأ في التحقق من صحة البيانات."
 sent_verification_email: "تم إرسال رمز التحقق إلى بريدك الإلكتروني."
+email_not_fond: "البريد الالكتروني غير موجود "

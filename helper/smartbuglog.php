@@ -12,6 +12,7 @@ function uuid() {
 
 function handlePDOException(PDOException $e) {
     $uuid = uuid();
+    $sqlState = ($e->errorInfo[0] ?? 'N/A'); // استخدم errorInfo لجلب SQLSTATE
     $errorMessage = sprintf(
         "[%s] PDOException: %s in %s on line %d (UUID: %s)\nSQLSTATE: %s\nCode: %s\nTrace: %s",
         date('Y-m-d H:i:s'),
@@ -20,7 +21,7 @@ function handlePDOException(PDOException $e) {
         $e->getLine(),
         $uuid,
         $e->getCode(),
-        $e->getSqlState(),
+        $sqlState,
         $e->getTraceAsString()
     );
 
@@ -54,12 +55,16 @@ function handleError($errno = null, $errstr = null, $errfile = null, $errline = 
         }
     }
 
-    // التحقق من استثناءات PDOException
-    if ($errstr instanceof PDOException) {
-        handlePDOException($errstr);
-        return; // لا داعي لمعالجة الخطأ العام بعد معالجة PDOException
+    // 🔥 **إصلاح المشكلة الأساسية هنا**
+    if ($errno instanceof Throwable) {
+        $exception = $errno; // حفظ الكائن للتعامل معه
+        $errno = E_ERROR; // تعيين خطأ عام لأن الاستثناء لا يملك كود خطأ PHP عادي
+        $errstr = $exception->getMessage();
+        $errfile = $exception->getFile();
+        $errline = $exception->getLine();
     }
 
+    // ✨ **تابع التنفيذ بعد تحويل أي استثناء إلى معلومات قابلة للمعالجة**
     $uuid = uuid();
 
     $errorType = [
@@ -94,18 +99,19 @@ function handleError($errno = null, $errstr = null, $errfile = null, $errline = 
     $log = new Logger('errors');
     $log->pushHandler(new StreamHandler(__DIR__ . '/error.log', Logger::ERROR));
 
-    if ($errno & (E_ERROR | E_PARSE | E_COMPILE_ERROR | E_CORE_ERROR)) {
+    // ✅ **التأكد من أن `$errno` عدد صحيح قبل تطبيق `&`**
+    if (is_int($errno) && ($errno & (E_ERROR | E_PARSE | E_COMPILE_ERROR | E_CORE_ERROR))) {
         $log->error($errorMessage);
-    } else if ($errno & (E_WARNING | E_USER_WARNING | E_COMPILE_WARNING | E_CORE_WARNING)) {
+    } else if (is_int($errno) && ($errno & (E_WARNING | E_USER_WARNING | E_COMPILE_WARNING | E_CORE_WARNING))) {
         $log->warning($errorMessage);
-    } else if ($errno & (E_NOTICE | E_USER_NOTICE | E_STRICT)) {
+    } else if (is_int($errno) && ($errno & (E_NOTICE | E_USER_NOTICE | E_STRICT))) {
         $log->notice($errorMessage);
     } else {
         $log->error($errorMessage);
     }
 
     if (defined('PRODUCTION_MODE') && PRODUCTION_MODE === true) {
-        echo "An error occured";
+        echo "An error occurred.";
     } else {
         echo "<pre>";
         echo $errorMessage . "\n";
@@ -116,6 +122,8 @@ function handleError($errno = null, $errstr = null, $errfile = null, $errline = 
         exit(1);
     }
 }
+
+
 
 set_exception_handler('handleError');
 set_error_handler('handleError');

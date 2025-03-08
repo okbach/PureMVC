@@ -134,7 +134,7 @@ class User {
         ];
 
         // إدخال الرمز في جدول verification_codes
-        $result = $this->crud->insert('verification_codes5', $verificationData);
+        $result = $this->crud->insert('verification_codes', $verificationData);
 
         if ($result) {
             return $code;

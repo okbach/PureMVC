@@ -202,9 +202,9 @@ class DynamicCrud
         return false;
     }
 
-    private function handleError(Exception $e): void
+   /* private function handleError(Exception $e): void
     {
         throw $e;
-    }
+    }*/
 }
 ?>

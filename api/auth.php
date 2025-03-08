@@ -96,12 +96,16 @@ $userModel = new User($pdo);
                // try {
                     $v = $validators->validateResetPassword();
                     if (!$v->validate()) {
-                        throw new Exception("خطأ في التحقق من البيانات: " . json_encode($v->errors()));
+                        //throw new Exception("خطأ في التحقق من البيانات: " . json_encode($v->errors()));
+                        response('error', null, $v->errors(), null, [], null);
                     }
             
                     $user = $userModel->crud->selectWhere('users', 'uid, email', ['email' => $data['email']], 1);
                     if (!$user) {
-                        throw new Exception("البريد الإلكتروني غير مسجل.");
+                        //throw new Exception("البريد الإلكتروني غير مسجل.");
+                        $message = $translator->trans('email_not_fond', [], null, $translator->getLocale());
+                        $result = ["message" => $message, "email" => "user@example.com"];
+                        response('error', $result, [], null, [], null);
                     }
             
                     $code = $userModel->createResetPasswordCode($user->uid, $user->email, 'email');
@@ -131,10 +135,7 @@ $userModel = new User($pdo);
                     $result = ["message" => $message, "email" => "user@example.com", "redirect_to" => "/verify-otp"];
                     response('success', $result, $v->errors(), $userModel->errorMessages, [], $translator);
             
-                //} catch (Exception $e) {
-                       
-                //    response('error', null, $v->errors(), $userModel->errorMessages, ['error' => $e->getMessage()], $translator);
-               // }
+
                 break;
             
  
