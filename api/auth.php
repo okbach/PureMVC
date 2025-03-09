@@ -144,24 +144,34 @@ $userModel = new User($pdo);
                 $v = $validators->validateUpdatePassword();
                 
                 if (!$v->validate()) {
-                    response('error', 'بيانات غير صالحة.', $v->errors());
+                    //response('error', 'بيانات غير صالحة.', $v->errors());
+                    response('error', [], $v->errors(), null, [], $translator);
                 }
             
                 $user = $userModel->crud->selectWhere('users', 'uid, email', ['email' => $data['email']], 1);
                 
                 if (!$user) {
-                    response('error', 'البريد الإلكتروني غير مسجل.');
+                    $message = $translator->trans('email_not_fond', [], null, $translator->getLocale());
+                    $result = ["message" => $message, "email" => "user@example.com"];
+                    response('error', $result, [], null, [], null);
+                    //response('error', 'البريد الإلكتروني غير مسجل.');
                 }
             
                 if (!$userModel->verifyResetPasswordCode($user->uid, $data['code'])) {
-                    response('error', 'الرمز غير صحيح أو منتهي الصلاحية.');
+                    //response('error', 'الرمز غير صحيح أو منتهي الصلاحية.');
+                    $message = $translator->trans('bad_otp', [], null, $translator->getLocale());
+                    $result = ["message" => $message];
+                    response('error', $result, [], null, [], null);
                 }
             
                 if (!$userModel->resetPassword($user->uid, $data['new_password'])) {
-                    response('error', 'فشل في تحديث كلمة المرور.');
+                    //response('error', 'فشل في تحديث كلمة المرور.');
+                    $message = $translator->trans('failed_resetPassword', [], null, $translator->getLocale());
+                    $result = ["message" => $message];
+                    response('error', $result, [], null, [], null);
                 }
             
-                response('success', 'تم تحديث كلمة المرور بنجاح.');
+                response('success', null, $v->errors(), $userModel->errorMessages, [], $translator);
             break;
 
             
