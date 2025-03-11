@@ -1,172 +1,64 @@
 <?php
 
 require __DIR__ . '/../helper/smart_Include.php';
-smartInclude('vendor/autoload.php');//for use namespece like use Valitron\Validator;
-smartInclude('/config/getDB.php');//function getDB()
+smartInclude('vendor/autoload.php');
+smartInclude('/config/getDB.php');
 use function App\config\getDB;
-use   App\helper\Mailer;
-smartInclude('helper/response.php');
-use  function App\helper\response;
-use App\model\User;
-use Twig\Loader\FilesystemLoader;
-use Twig\Environment;
-use App\Validation\UserValidator;
-$validators = new UserValidator();
-use App\Services\JwtService;
-$jwtService = new JwtService(jwtKey);
+use  App\helper\response;
+use App\Controller\auth;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
-$lang ='ar';
-$translator = new Translator($lang); 
+$lang = 'ar';
+$translator = new Translator($lang);
 $translator->addLoader('yaml', new YamlFileLoader());
-$translator->addResource('yaml', __DIR__ . '/../translations/auth/'.$lang.'.yaml', $lang);
+$translator->addResource('yaml', __DIR__ . '/../translations/auth/' . $lang . '.yaml', $lang);
 
-//----------------------------------------------------------------------------
+$data = json_decode(file_get_contents('php://input'), true);
+$pdo = getDB();
 
+$auth = new auth($pdo, $translator);
 
+if (isset($_GET['action'])) {
+    $action = $_GET['action'];
 
-$data = json_decode(file_get_contents('php://input'), true);//catch all input for procee 
-//print_r($data);
+    switch ($action) {
 
+        case 'create':
 
+            $result = $auth->create($data);
 
-$pdo = getDB(); // this to connect db
-
-
-$userModel = new User($pdo);
-
-
-
-
-
-
-    if (isset($_GET['action'])) {
-        $action = $_GET['action'];
-        
-        switch ($action) { 
-
-            case 'create':
-                 
-                $v = $validators->validateRegistration();//Validators::validateRegistration($data);
-               
-                
-                if ($v->validate() && $result = $userModel->create($data) ) { 
-                    response('success', $result);
-                } else {     
-                    response('error', null, $v->errors(),$userModel->errorMessages,[],$translator);              
-                }
-               
-            break;
-            case 'login':
-             
-                $v = $validators->validateLogin();
-
-                if ($v->validate() && $result = $userModel->login($data) ) { 
-
-                    
-                    
-                    $result->Token    =    $jwtService->generateToken((array) $result, 3600 * 24); // 1 day
-                    $result->refreshToken =    $jwtService->generateToken((array) $result, 3600 * 30); // 30 day
-                    //header('Authorization: Bearer ' . $Token);
-                        response('success', $result);      
-                } else {    
-                    response('error', null, $v->errors(),$userModel->errorMessages,[],$translator);            
-                        
-                }
-                   
-            break;
-            case 'resetpassword':
-               // try {
-                    $v = $validators->validateResetPassword();
-                    if (!$v->validate()) {
-                        //throw new Exception("خطأ في التحقق من البيانات: " . json_encode($v->errors()));
-                        response('error', null, $v->errors(), null, [], null);
-                    }
-            
-                    $user = $userModel->crud->selectWhere('users', 'uid, email', ['email' => $data['email']], 1);
-                    if (!$user) {
-                        //throw new Exception("البريد الإلكتروني غير مسجل.");
-                        $message = $translator->trans('email_not_fond', [], null, $translator->getLocale());
-                        $result = ["message" => $message, "email" => "user@example.com"];
-                        response('error', $result, [], null, [], null);
-                    }
-            
-                    $code = $userModel->createResetPasswordCode($user->uid, $user->email, 'email');
-                    if (!$code) {
-                        throw new Exception("فشل في إنشاء رمز التحقق.");
-                    }
-            
-                    $url = "$code";
-                    $datax = smartInclude("lang/$lang/email/resetpassword.php");
-                    $datax['url'] = $url;
-                    $datax['company_name'] = 'wadiea';
-                    $datax['dir'] = 'rtl';
-                    $datax['language'] = $lang;
-                    $subject = $datax['subject'];
-            
-                    $loader = new FilesystemLoader(__DIR__ . '/../view/templates');
-                    $twig = new Environment($loader, ['cache' => __DIR__ . '/cache', 'debug' => true]);
-                    $body = $twig->render('email/resetpassword.twig', $datax);
-            
-                    $mailer = new Mailer();
-                    $to = $user->email;
-                    if (!$mailer->send($to, $subject, $body, true)) {
-                        throw new Exception("فشل في إرسال البريد الإلكتروني.");
-                    }
-            
-                    $message = $translator->trans('sent_verification_email', [], null, $translator->getLocale());
-                    $result = ["message" => $message, "email" => "user@example.com", "redirect_to" => "/verify-otp"];
-                    response('success', $result, $v->errors(), $userModel->errorMessages, [], $translator);
-                  
-
-                break;
-            
- 
-            case 'updatepassword':
-
-                $v = $validators->validateUpdatePassword();
-                
-                if (!$v->validate()) {
-                    //response('error', 'بيانات غير صالحة.', $v->errors());
-                    response('error', [], $v->errors(), null, [], $translator);
-                }
-            
-                $user = $userModel->crud->selectWhere('users', 'uid, email', ['email' => $data['email']], 1);
-                
-                if (!$user) {
-                    $message = $translator->trans('email_not_fond', [], null, $translator->getLocale());
-                    $result = ["message" => $message, "email" => "user@example.com"];
-                    response('error', $result, [], null, [], null);
-                    //response('error', 'البريد الإلكتروني غير مسجل.');
-                }
-            
-                if (!$userModel->verifyResetPasswordCode($user->uid, $data['code'])) {
-                    //response('error', 'الرمز غير صحيح أو منتهي الصلاحية.');
-                    $message = $translator->trans('bad_otp', [], null, $translator->getLocale());
-                    $result = ["message" => $message];
-                    response('error', $result, [], null, [], null);
-                }
-            
-                if (!$userModel->resetPassword($user->uid, $data['new_password'])) {
-                    //response('error', 'فشل في تحديث كلمة المرور.');
-                    $message = $translator->trans('failed_resetPassword', [], null, $translator->getLocale());
-                    $result = ["message" => $message];
-                    response('error', $result, [], null, [], null);
-                }
-            
-                response('success', null, $v->errors(), $userModel->errorMessages, [], $translator);
             break;
 
-            
-            default:
-                response('error', 'Invalid action'); 
+        case 'login':
+
+            $result = $auth->login($data);
+
             break;
 
-        }
-    } else {
+        case 'resetpassword':
 
-        response('error', 'Action parameter is required'); 
+            $result = $auth->resetPassword($data);
+
+            break;
+
+        case 'updatepassword':
+
+            $result = $auth->updatePassword($data);
+            
+            break;
+
+        default:
+
+            $result = ['error', 'Invalid action'];
+            
+            break;
     }
+} else {
+    $result = ['error', 'Action parameter is required'];
+}
+$response = new response(...$result);
+$response->send();
+// in htmx or view use $jsonString = $response->getJson(); 
 
 ?>

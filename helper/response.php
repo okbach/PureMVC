@@ -1,39 +1,56 @@
 <?php
+
 namespace App\helper;
 
-
-
-function response(string $status, mixed $result = null, array $errorsValidation = [], string $errorsDatabase = null, array $errorsLogic = [],   $translator = null): void
+class response
 {
-    // http_response_code($status === 'success' ? 200 : 400); // يمكنك إضافة رموز حالة HTTP إذا لزم الأمر
-    header('Content-Type: application/json');
+    private $status;
+    private $result;
+    private $errorsValidation;
+    private $errorsDatabase;
+    private $errorsLogic;
+    private $translator;
 
-    $errors = [];
-    if (!empty($errorsValidation)) {
-        $errors = $errorsValidation; //  $errors['validation'] = $errorsValidation;
+    public function __construct(string $status, $result = null, array $errorsValidation = [], $errorsDatabase = null, array $errorsLogic = [], $translator = null)
+    {
+        $this->status = $status;
+        $this->result = $result;
+        $this->errorsValidation = $errorsValidation;
+        $this->errorsDatabase = $errorsDatabase;
+        $this->errorsLogic = $errorsLogic;
+        $this->translator = $translator;
     }
 
-    if (!empty($errorsDatabase)) {
-        if ($translator !== null) {
-            $errors= $translator->trans($errorsDatabase, [], null, $translator->getLocale()); //  $errors['database']
-        } else {
-            $errors = $errorsDatabase;
+    public function getJson(): string
+    {
+        $errors = [];
+        if (!empty($this->errorsValidation)) {
+            $errors = $this->errorsValidation;
         }
+
+        if (!empty($this->errorsDatabase)) {
+            if ($this->translator !== null) {
+                $errors = $this->translator->trans($this->errorsDatabase, [], null, $this->translator->getLocale());
+            } else {
+                $errors = $this->errorsDatabase;
+            }
+        }
+
+        if (!empty($this->errorsLogic)) {
+            $errors = $this->errorsLogic;
+        }
+
+        return json_encode([
+            'status' => $this->status,
+            'result' => $this->result,
+            'errors' => $errors,
+        ]);
     }
 
-    if (!empty($errorsLogic)) {
-        $errors = $errorsLogic; //$errors['logic']
+    public function send(): void
+    {
+        header('Content-Type: application/json');
+        echo $this->getJson();
+        exit;
     }
-
-    echo json_encode([
-        'status' => $status,
-        'result' => $result,
-        'errors' => $errors,
-    ]);
-
-    exit;
 }
-
-// مثال على الاستخدام:
-// response('error', null, ['email' => 'البريد الإلكتروني غير صالح'], 'database.error1', ['الحساب غير موجود'], $translator);
-?>
