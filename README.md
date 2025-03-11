@@ -18,8 +18,8 @@ php composer.phar update
 ```
 Set up the database:
 
-Open phpMyAdmin and create a new database named mymvc.
+~~Open phpMyAdmin and create a new database named mymvc.~~
 
 Run the database migration or installation script:
 
-php mymvc/start/install2.php
+php mymvc/start/install.php
