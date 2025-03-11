@@ -1,4 +1,6 @@
 <?php
+namespace App\helper;
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 

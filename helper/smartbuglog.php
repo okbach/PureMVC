@@ -1,6 +1,6 @@
 <?php
 
-//require_once __DIR__ . '/vendor/autoload.php'; // تأكد من تثبيت Monolog
+
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -12,7 +12,7 @@ function uuid() {
 
 function handlePDOException(PDOException $e) {
     $uuid = uuid();
-    $sqlState = ($e->errorInfo[0] ?? 'N/A'); // استخدم errorInfo لجلب SQLSTATE
+    $sqlState = ($e->errorInfo[0] ?? 'N/A'); 
     $errorMessage = sprintf(
         "[%s] PDOException: %s in %s on line %d (UUID: %s)\nSQLSTATE: %s\nCode: %s\nTrace: %s",
         date('Y-m-d H:i:s'),
@@ -29,7 +29,7 @@ function handlePDOException(PDOException $e) {
     $log->pushHandler(new StreamHandler(__DIR__ . '/pdo_error.log', Logger::ERROR));
     $log->error($errorMessage);
 
-    // في وضع الإنتاج، قد نرغب في عرض رسالة خطأ عامة للمستخدمين
+    
     if (defined('PRODUCTION_MODE') && PRODUCTION_MODE === true) {
         echo "An error occurred. Please try again later.";
     } else {
@@ -55,16 +55,16 @@ function handleError($errno = null, $errstr = null, $errfile = null, $errline = 
         }
     }
 
-    // 🔥 **إصلاح المشكلة الأساسية هنا**
+   
     if ($errno instanceof Throwable) {
-        $exception = $errno; // حفظ الكائن للتعامل معه
-        $errno = E_ERROR; // تعيين خطأ عام لأن الاستثناء لا يملك كود خطأ PHP عادي
+        $exception = $errno; 
+        $errno = E_ERROR; 
         $errstr = $exception->getMessage();
         $errfile = $exception->getFile();
         $errline = $exception->getLine();
     }
 
-    // ✨ **تابع التنفيذ بعد تحويل أي استثناء إلى معلومات قابلة للمعالجة**
+   
     $uuid = uuid();
 
     $errorType = [
@@ -99,7 +99,7 @@ function handleError($errno = null, $errstr = null, $errfile = null, $errline = 
     $log = new Logger('errors');
     $log->pushHandler(new StreamHandler(__DIR__ . '/error.log', Logger::ERROR));
 
-    // ✅ **التأكد من أن `$errno` عدد صحيح قبل تطبيق `&`**
+
     if (is_int($errno) && ($errno & (E_ERROR | E_PARSE | E_COMPILE_ERROR | E_CORE_ERROR))) {
         $log->error($errorMessage);
     } else if (is_int($errno) && ($errno & (E_WARNING | E_USER_WARNING | E_COMPILE_WARNING | E_CORE_WARNING))) {

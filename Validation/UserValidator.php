@@ -2,6 +2,9 @@
 
 namespace App\Validation;
 
+use App\Validation\BaseValidator;
+
+
 class UserValidator extends BaseValidator
 {
     public function validateRegistration()

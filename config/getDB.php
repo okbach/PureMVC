@@ -1,9 +1,9 @@
-
 <?php
 
+namespace App\config;
+use PDO;
 
-
-function getDB()
+function getDB():PDO
 {
 
   $host = host;

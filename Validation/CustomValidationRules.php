@@ -1,4 +1,6 @@
 <?php
+namespace App\Validation;
+
 use Valitron\Validator;
 
 class CustomValidationRules {
@@ -21,5 +23,5 @@ class CustomValidationRules {
 }
 
 
-CustomValidationRules::register();
+
 ?>

@@ -1,11 +1,12 @@
 <?php
 
-//namespace App\Models;
+namespace App\model;
 
 
 
-//require_once __DIR__ . '/../config/database.php'; // استيراد الاتصال بقاعدة البيانات
-//require_once __DIR__ . '/../helpers/DynamicCrud.php'; // استيراد كود CRUD
+
+use App\helper\DynamicCrud;
+use PDO;
 
 
 class User {

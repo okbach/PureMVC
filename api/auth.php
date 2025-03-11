@@ -2,34 +2,18 @@
 
 require __DIR__ . '/../helper/smart_Include.php';
 smartInclude('vendor/autoload.php');//for use namespece like use Valitron\Validator;
-smartInclude('helper/smartbuglog.php');
-
-smartInclude('config/env.php');
-smartInclude('config/connect_db.php');//function getDB()
-smartInclude('helper/curd_db.php');//DynamicCrud
-smartInclude('helper/mailer.php');//send email
-smartInclude('helper/response.php');// respons json 
-smartInclude('helper/render_template.php');// respons json 
-smartInclude('model/user.php');//User class databass
-
-
-
-// Twig for templet 
+smartInclude('/config/getDB.php');//function getDB()
+use function App\config\getDB;
+use   App\helper\Mailer;
+smartInclude('helper/response.php');
+use  function App\helper\response;
+use App\model\User;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
-
-//--------------------------------------------------------------------
-smartInclude('Validation/custom_valid.php');// Custom Validator
-smartInclude('Validation/BaseValidator.php');// Custom Validator
-smartInclude('Validation/UserValidator.php');// Custom Validator
 use App\Validation\UserValidator;
 $validators = new UserValidator();
-//--------------------------------------------------------------------------
-
-smartInclude('services/JwtService.php');
 use App\Services\JwtService;
 $jwtService = new JwtService(jwtKey);
-//-------------------------------------------------------------------------
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
@@ -134,7 +118,7 @@ $userModel = new User($pdo);
                     $message = $translator->trans('sent_verification_email', [], null, $translator->getLocale());
                     $result = ["message" => $message, "email" => "user@example.com", "redirect_to" => "/verify-otp"];
                     response('success', $result, $v->errors(), $userModel->errorMessages, [], $translator);
-            
+                  
 
                 break;
             
