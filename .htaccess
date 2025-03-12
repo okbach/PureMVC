@@ -1,14 +1,28 @@
-# منع الوصول المباشر إلى المجلدات الحساسة
+
+php_flag display_errors off
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # منع الوصول إلى المجلدات الحساسة
+    
     RewriteRule ^(view|model|helper|controller|config)($|/) - [F,L]
-    
-    php_flag display_errors off
-    
-    # إعادة التوجيه إلى مجلد public
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ public/index.php [L]
+
+    #block .php and redirct 
+    RewriteCond %{THE_REQUEST} \.php [NC]
+    RewriteRule ^ - [R=404,L]
+
+    # aloow real file
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule . - [L]
+
+    #hide .php
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.*)$ $1.php [L,QSA]
+
+
+
+
 </IfModule>
+
+
+
