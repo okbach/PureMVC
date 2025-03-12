@@ -12,14 +12,14 @@ use PDO;
 class User {
     public DynamicCrud $crud;
     
-    public string $errorMessages = '';
+    public string $errorMessages = '';//only for raed no writ
 
     public function __construct(PDO $db)
     {
         $this->crud = new DynamicCrud($db);
     }
 
-    // إنشاء مستخدم جديد
+
     public function create(array $userData): bool
     {
     
@@ -65,54 +65,53 @@ class User {
         
     }
 
-    // استرجاع مستخدم بواسطة البريد الإلكتروني
     public function getByEmail(string $email): ?array
     {
         return $this->crud->selectWhere('users', '*', ['email' => $email], 1);
     }
 
-    // تحديث بيانات المستخدم
+    
     public function update(int $userId, array $userData): bool
     {
         return $this->crud->update('users', $userData, ['id' => $userId]);
     }
 
-    // حذف مستخدم
+    
     public function delete(int $userId): bool
     {
         return $this->crud->delete('users', ['id' => $userId]);
     }
 
-    // استرجاع جميع المستخدمين
+    
     public function getAll(int $page = 1): array
     {
         return $this->crud->select_search('users', '*', [], '', $page);
     }
 
-    // تحقق من صحة بيانات الدخول
+
     public function validateLogin(string $email, string $password): ?array
     {
-        // يمكنك إضافة عملية تشفير كلمة المرور هنا
+        
         $user = $this->getByEmail($email);
         
         if ($user && password_verify($password, $user['password'])) {
-            return $user; // إذا كانت البيانات صحيحة، نرجع معلومات المستخدم
+            return $user; 
         }
         
-        return null; // إذا كانت البيانات غير صحيحة
+        return null; 
     }
 
-    // تحديث كلمة المرور
+    
     public function updatePassword(int $userId, string $newPassword): bool
     {
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
         return $this->crud->update('users', ['password' => $hashedPassword], ['id' => $userId]);
     }
 
-    // توليد وتحديث مفتاح API للمستخدم
+    
     public function generateApiToken(int $userId): string
     {
-        $apiToken = bin2hex(random_bytes(40)); // توليد مفتاح عشوائي
+        $apiToken = bin2hex(random_bytes(40)); //privet key 
         $this->crud->update('users', ['api_token' => $apiToken], ['id' => $userId]);
         return $apiToken;
     }
@@ -121,20 +120,20 @@ class User {
 
     public function createResetPasswordCode(int $userId, string $email, string $viaMethod = 'email'): ?string
     {
-        // إنشاء رمز عشوائي
-        $code = bin2hex(random_bytes(16));
+        
+        $code = random_int(100000, 999999); //bin2hex(random_bytes(16));
 
-        // بيانات الرمز
+        
         $verificationData = [
             'user_id' => $userId,
             'code' => $code,
             'purpose' => 'password_reset',
             'via_method' => $viaMethod,
-            'expires_at' => date('Y-m-d H:i:s', strtotime('+1 hour')), // صلاحية الرمز لمدة ساعة
+            'expires_at' => date('Y-m-d H:i:s', strtotime('+1 hour')), 
             'email' => $email
         ];
 
-        // إدخال الرمز في جدول verification_codes
+        
         $result = $this->crud->insert('verification_codes', $verificationData);
 
         if ($result) {
@@ -146,7 +145,7 @@ class User {
 
     public function verifyResetPasswordCode(int $userId, string $code): bool
     {
-        // البحث عن الرمز في جدول verification_codes
+    
         $verificationCode = $this->crud->selectWhere('verification_codes', '*', [
             'user_id' => $userId,
             'code' => $code,
@@ -158,14 +157,15 @@ class User {
             //ريما ليس علي حذفه لتسجيل عدد المحاولات  
             $this->crud->delete('verification_codes', ['id' => $verificationCode->id]);
     
-            // التحقق من أن الرمز لم ينتهِ صلاحيته ولم يتم استخدامه
+           
             $currentTime = date('Y-m-d H:i:s');
             if ($verificationCode->expires_at > $currentTime && $verificationCode->used_at === null) {
-                return true; // الرمز صالح
+                //$this->errorMessages = 'time otp is expr';
+                return true; 
             }
         }
     
-        return false; // الرمز غير صالح أو غير موجود
+        return false; 
     }
 
 

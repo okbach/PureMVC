@@ -86,7 +86,7 @@ class auth
         }
 
         $message = $this->translator->trans('sent_verification_email', [], null, $this->translator->getLocale());
-        $result = ["message" => $message, "email" => "user@example.com", "redirect_to" => "/verify-otp"];
+        $result = ["message" => $message, "email" =>$data['email'] , "redirect_to" => "/api/auth.php?action=updatepassword"];
         return ['success', $result, $v->errors(), $this->userModel->errorMessages, [], $this->translator];
     }
 
