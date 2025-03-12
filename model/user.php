@@ -43,8 +43,9 @@ class User {
         
         $email = $userData['email'];
         $password =  $userData['password'] ;
-
-        $data =  $this->crud->selectWhere('users', 'uid,email,password', ['email' => $email], 1);// نحتاج الباسورد في رد  من اجل تححق من انه مطابق 
+        
+        
+        $data =  $this->crud->selectWhere('users', 'uid,email,password', ['email' => $email,'email_verified'=>true], 1);// نحتاج الباسورد في رد  من اجل تححق من انه مطابق 
 
         if (!$data) {
 
@@ -58,6 +59,8 @@ class User {
                 return $data;
 
         }else{
+
+            //تسجيل محاول تسجيل دخول فاشلة 
 
             $this->errorMessages = 'login_failed';//'تحقق من كلمة سر مرة ثانية';
             return false; 

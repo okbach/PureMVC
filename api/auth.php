@@ -19,6 +19,9 @@ $pdo = getDB();
 
 $auth = new auth($pdo, $translator);
 
+
+//Roles & Permissions
+
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
 
@@ -27,6 +30,8 @@ if (isset($_GET['action'])) {
         case 'create':
 
             $result = $auth->create($data);
+            //Email Verification
+            //phone Verification
 
             break;
 
@@ -35,7 +40,9 @@ if (isset($_GET['action'])) {
             $result = $auth->login($data);
 
             break;
-
+            //(Social Login) Google, Facebook, GitHub, Twitter. Laravel Socialite أو PHP League OAuth2
+            //(Two-Factor Authentication - 2FA)
+            // (Device Management)
         case 'resetpassword':
 
             $result = $auth->resetPassword($data);
