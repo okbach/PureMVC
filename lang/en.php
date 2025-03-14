@@ -39,5 +39,6 @@ return array(
     'requiredWithout'=> "is required",
     'subset'         => "contains an item that is not in the list",
     'arrayHasKeys'   => "does not contain all required keys",
+    'phone'          => "must be phone num +code contry",
     'extra_input'      => "Unexpected input",
 );

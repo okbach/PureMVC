@@ -2,8 +2,14 @@
     "name": "mymvc/smsapi",
     "description": "api for otp and sms",
     "type": "project",
+    "repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/okbach/valitron"
+    }
+],
     "require": {
-        "vlucas/valitron": "^1.4",
+        "okbach/valitron": "dev-master",
         "firebase/php-jwt": "^6.10",
         "phpmailer/phpmailer": "^6.9",
         "twig/twig": "^3.18",

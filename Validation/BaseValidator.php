@@ -15,13 +15,14 @@ class BaseValidator
     public function __construct($language = 'ar')
     {
 
-        
+        CustomValidationRules::register();        
         Validator::langDir(__DIR__ . '/../lang');
         Validator::lang($this->language); 
+
         $this->data = json_decode(file_get_contents('php://input'), true);
         $this->v = new Validator($this->data);
         $this->language = $language;
-        CustomValidationRules::register();
+
     }
 
     public function getValidator()
