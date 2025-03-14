@@ -24,7 +24,7 @@ class User {
     {
     
         $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
-        
+        $code = random_int(100000, 999999); 
         $userData['api_token'] =  bin2hex(random_bytes(32));// 64 CHAR
         $userId = $this->crud->insert('users', $userData);
 

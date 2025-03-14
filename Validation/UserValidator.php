@@ -9,12 +9,18 @@ class UserValidator extends BaseValidator
 {
     public function validateRegistration()
     {
+
+
+        $allowedKeys = ['name', 'email','phone_number','password'];
+        $this->v->AllowedFields($allowedKeys);
+
         $this->v->rule('required', 'name')->rule('alphaNum', 'name')->rule('lengthBetween', 'name', 4, 10);
         $this->v->rule('required', 'email')->rule('email', 'email');
-        $this->v->rule('phone', 'phone_number')->rule('required', 'phone_number');
+        $this->v->rule('required', 'phone_number')->rule('phone', 'phone_number');
         $this->v->rule('lengthMin', 'password', 8)->rule('required', 'password');
         $this->v->rule('regex', 'password', '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/')
             ->message('Make sure your password contains uppercase and lowercase letters, numbers and symbols.');
+            
         return $this->v;
     }
 
