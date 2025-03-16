@@ -1,5 +1,5 @@
 <?php
-
+/*
 function customEncode(userId) {
   return (userId * 123 + 456).toString();
 }
@@ -14,5 +14,6 @@ function customDecode(encodedUserId) {
 
 const decodedUserId = customDecode(encodedUserId);
 console.log(decodedUserId); // 123
+*/
 
 ?>
